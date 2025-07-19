@@ -32,7 +32,7 @@ public class LoanAccountService {
 
         try {
             // Call external API
-            logger.debug("Calling external API for loan account: {}", loanAccountNumber);
+            logger.info("Calling external API for loan account: {}", loanAccountNumber);
             LoanApiResponse apiResponse = externalLoanApiClient.fetchLoanDetails(loanAccountNumber);
 
             if (apiResponse == null) {
@@ -40,7 +40,7 @@ public class LoanAccountService {
                 return null;
             }
 
-            logger.debug("Received API response with {} EMI details for account: {}",
+            logger.info("Received API response with {} EMI details for account: {}",
                     apiResponse.getEmiDetails().size(), loanAccountNumber);
 
             // Find next due EMI
@@ -62,7 +62,7 @@ public class LoanAccountService {
                 }
 
                 // Save to database
-                logger.debug("Saving loan account to database: {}", loanAccountNumber);
+                logger.info("Saving loan account to database: {}", loanAccountNumber);
                 LoanAccount account = new LoanAccount(
                         apiResponse.getLoanAccountNumber(),
                         dueDate,
@@ -79,7 +79,7 @@ public class LoanAccountService {
                         savedAccount.getEmiAmount()
                 );
 
-                logger.debug("Created response DTO for account: {}", loanAccountNumber);
+                logger.info("Created response DTO for account: {}", loanAccountNumber);
                 return response;
 
             } else {
@@ -94,13 +94,13 @@ public class LoanAccountService {
     }
 
     private LocalDate parseEmiDate(String monthString) {
-        logger.debug("Parsing EMI date string: {}", monthString);
+        logger.info("Parsing EMI date string: {}", monthString);
 
         try {
             // Convert "April 2024" to "2024-04-01"
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy d");
             LocalDate date = LocalDate.parse(monthString + " 1", formatter);
-            logger.debug("Successfully parsed date: {} to {}", monthString, date);
+            logger.info("Successfully parsed date: {} to {}", monthString, date);
             return date;
 
         } catch (DateTimeParseException e) {

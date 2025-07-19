@@ -60,12 +60,12 @@ public class ExternalLoanApiClient {
     public LoanApiResponse fetchLoanDetails(String loanAccountNumber) {
         String url = BASE_URL + loanAccountNumber;
         logger.info("Making external API call to fetch loan details for account: {}", loanAccountNumber);
-        logger.debug("External API URL: {}", url);
+        logger.info("External API URL: {}", url);
 
         long startTime = System.currentTimeMillis();
 
         try {
-            logger.debug("Sending GET request to external API");
+            logger.info("Sending GET request to external API");
             LoanApiResponse response = restTemplate.getForObject(url, LoanApiResponse.class);
 
             long endTime = System.currentTimeMillis();
@@ -74,13 +74,13 @@ public class ExternalLoanApiClient {
             if (response != null) {
                 logger.info("Successfully received response from external API for account: {} in {}ms",
                         loanAccountNumber, responseTime);
-                logger.debug("Response contains {} EMI details",
+                logger.info("Response contains {} EMI details",
                         response.getEmiDetails() != null ? response.getEmiDetails().size() : 0);
 
                 // Log EMI details at debug level
                 if (response.getEmiDetails() != null) {
                     response.getEmiDetails().forEach(emi ->
-                            logger.debug("EMI Detail - Month: {}, Amount: {}, Paid: {}, Due: {}",
+                            logger.info("EMI Detail - Month: {}, Amount: {}, Paid: {}, Due: {}",
                                     emi.getMonth(), emi.getEmiAmount(), emi.isPaidStatus(), emi.isDueStatus())
                     );
                 }

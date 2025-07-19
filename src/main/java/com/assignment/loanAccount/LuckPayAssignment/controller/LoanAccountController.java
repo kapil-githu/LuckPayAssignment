@@ -21,7 +21,7 @@ public class LoanAccountController {
     @GetMapping("/{loanAccountNumber}")
     public ResponseEntity<LoanResponseDTO> getLoanDetails(@PathVariable String loanAccountNumber) {
         logger.info("Received loan details request for account: {}", loanAccountNumber);
-        logger.debug("Processing GET request for loan account: {}", loanAccountNumber);
+        logger.info("Processing GET request for loan account: {}", loanAccountNumber);
         try {
             long startTime = System.currentTimeMillis();
 
@@ -39,7 +39,7 @@ public class LoanAccountController {
             if (dto != null) {
                 logger.info("Successfully processed loan request for account: {} in {}ms",
                         loanAccountNumber, processingTime);
-                logger.debug("Response data: loanAccountNumber={}, dueDate={}, emiAmount={}",
+                logger.info("Response data: loanAccountNumber={}, dueDate={}, emiAmount={}",
                         dto.getLoanAccountNumber(), dto.getDueDate(), dto.getEmiAmount());
                 return ResponseEntity.ok(dto);
             } else {
