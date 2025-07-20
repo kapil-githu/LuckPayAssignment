@@ -1,6 +1,8 @@
 package com.assignment.loanAccount.LuckPayAssignment.dto;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.ArrayList;
 
 public class LoanResponseDTO {
     private String loanAccountNumber;

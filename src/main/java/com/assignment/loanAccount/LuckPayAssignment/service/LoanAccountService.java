@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class LoanAccountService {
@@ -28,7 +30,7 @@ public class LoanAccountService {
     @Autowired
     private ExternalLoanApiClient externalLoanApiClient;
 
-    public LoanResponseDTO handleLoanRequest(String loanAccountNumber) {
+    public List<LoanResponseDTO> handleLoanRequest(String loanAccountNumber) {
         logger.info("Starting loan request processing for account: {}", loanAccountNumber);
 
         try {
@@ -44,14 +46,11 @@ public class LoanAccountService {
             logger.info("Received API response with {} EMI details for account: {}",
                     apiResponse.getEmiDetails().size(), loanAccountNumber);
 
-            // Find next due EMI
-            Optional<LoanEmi> nextDue = apiResponse.getEmiDetails().stream()
-                    .filter(LoanEmi::isDueStatus)
-                    .findFirst();
-
-            if (nextDue.isPresent()) {
-                LoanEmi emi = nextDue.get();
-                logger.info("Found due EMI for account: {}, month: {}, amount: {}",
+            // Process all EMIs
+            List<LoanResponseDTO> emiResponses = new ArrayList<>();
+            
+            for (LoanEmi emi : apiResponse.getEmiDetails()) {
+                logger.info("Processing EMI for account: {}, month: {}, amount: {}",
                         loanAccountNumber, emi.getMonth(), emi.getEmiAmount());
 
                 // Parse date
@@ -59,7 +58,7 @@ public class LoanAccountService {
                 if (dueDate == null) {
                     logger.error("Failed to parse EMI date: {} for account: {}",
                             emi.getMonth(), loanAccountNumber);
-                    return null;
+                    continue;
                 }
 
                 // Save to database
@@ -73,19 +72,23 @@ public class LoanAccountService {
                 LoanAccount savedAccount = loanAccountRepository.save(account);
                 logger.info("Successfully saved loan account: {} to database", loanAccountNumber);
 
-                // Create response DTO
-                LoanResponseDTO response = new LoanResponseDTO(
+                // Create response DTO for this EMI
+                LoanResponseDTO emiResponse = new LoanResponseDTO(
                         savedAccount.getLoanAccountNumber(),
                         savedAccount.getDueDate(),
                         savedAccount.getEmiAmount()
                 );
+                
+                emiResponses.add(emiResponse);
+            }
 
-                logger.info("Created response DTO for account: {}", loanAccountNumber);
-                return response;
-
+            if (!emiResponses.isEmpty()) {
+                logger.info("Created response DTOs for account: {}, count: {}", 
+                    loanAccountNumber, emiResponses.size());
+                return emiResponses;
             } else {
-                logger.warn("No due EMI found for account: {}", loanAccountNumber);
-                return null;
+                logger.warn("No EMI details processed for account: {}", loanAccountNumber);
+                return Collections.emptyList();
             }
 
         } catch (Exception e) {

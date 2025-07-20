@@ -8,11 +8,20 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "loan_account")
+@Table(name = "loan_acc")
 public class LoanAccount {
     @Id
+    @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @jakarta.persistence.Column(name = "id")
+    private Long id;
+    
+    @jakarta.persistence.Column(name = "loan_account_number")
     private String loanAccountNumber;
+    
+    @jakarta.persistence.Column(name = "due_date")
     private LocalDate dueDate;
+    
+    @jakarta.persistence.Column(name = "emi_amount")
     private int emiAmount;
 
     // Constructors, getters, and setters
@@ -22,6 +31,7 @@ public class LoanAccount {
         this.loanAccountNumber = loanAccountNumber;
         this.dueDate = dueDate;
         this.emiAmount = emiAmount;
+        // id will be auto-generated
     }
 
     public String getLoanAccountNumber() {
@@ -46,6 +56,14 @@ public class LoanAccount {
 
     public void setEmiAmount(int emiAmount) {
         this.emiAmount = emiAmount;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 

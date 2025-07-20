@@ -2,6 +2,7 @@ package com.assignment.loanAccount.LuckPayAssignment.controller;
 
 import com.assignment.loanAccount.LuckPayAssignment.dto.LoanResponseDTO;
 import com.assignment.loanAccount.LuckPayAssignment.service.LoanAccountService;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class LoanAccountController {
     private LoanAccountService loanAccountService;
 
     @GetMapping("/{loanAccountNumber}")
-    public ResponseEntity<LoanResponseDTO> getLoanDetails(@PathVariable String loanAccountNumber) {
+    public ResponseEntity<List<LoanResponseDTO>> getLoanDetails(@PathVariable String loanAccountNumber) {
         logger.info("Received loan details request for account: {}", loanAccountNumber);
         logger.info("Processing GET request for loan account: {}", loanAccountNumber);
         try {
@@ -31,17 +32,16 @@ public class LoanAccountController {
                 return ResponseEntity.badRequest().build();
             }
 
-            LoanResponseDTO dto = loanAccountService.handleLoanRequest(loanAccountNumber);
+            List<LoanResponseDTO> dtos = loanAccountService.handleLoanRequest(loanAccountNumber);
 
             long endTime = System.currentTimeMillis();
             long processingTime = endTime - startTime;
 
-            if (dto != null) {
+            if (dtos != null && !dtos.isEmpty()) {
                 logger.info("Successfully processed loan request for account: {} in {}ms",
                         loanAccountNumber, processingTime);
-                logger.info("Response data: loanAccountNumber={}, dueDate={}, emiAmount={}",
-                        dto.getLoanAccountNumber(), dto.getDueDate(), dto.getEmiAmount());
-                return ResponseEntity.ok(dto);
+                logger.info("Retrieved {} EMI records for account: {}", dtos.size(), loanAccountNumber);
+                return ResponseEntity.ok(dtos);
             } else {
                 logger.warn("No loan details found for account: {}", loanAccountNumber);
                 return ResponseEntity.notFound().build();
